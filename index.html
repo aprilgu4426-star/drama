@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Vanilla Flashcard App Template</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<!-- The font used for the flashcard app. You can change this to any other font. -->
+		<link href="https://fonts.googleapis.com/css2?family=Playpen+Sans:wght@100..800&display=swap" rel="stylesheet" />
+		<!-- This line loads the CSS file containing the styles for the flashcard app. It can be modified to change the appearance of the app. -->
+		<link rel="stylesheet" href="./index.css" />
+	</head>
+	<body>
+		<main>
+			<!-- The heading includes a button to show/hide all flashcard entries. -->
+			<h1 id="heading">
+				<button id="toggle-entries" title="Show All Entries">|||</button>
+				Vanilla Flashcard App Template
+			</h1>
+			<!-- A list of all cards for quick access -->
+			<div id="entries" class="transition-fade transition-slide-from-left transition-slide-from-top" hidden>
+				<div id="entries-inner">
+					<table>
+						<thead>
+							<tr>
+								<th>ID</th>
+								<th>Word</th>
+								<th>Due Date</th>
+							</tr>
+						</thead>
+						<tbody id="entries-body"></tbody>
+					</table>
+				</div>
+			</div>
+			<!-- The flashcard area. Clicking flips between front and back by setting `dataset.side`. -->
+			<div id="card">
+				<button id="card-inner" data-side="front">
+					<!-- STUDENTS: Start of recommended modifications -->
+					<!-- Add and rearrange HTML elements inside .card-front and .card-back below. -->
+					<div class="card-face card-front">
+						<h2 id="card-front-word"></h2>
+					</div>
+					<div class="card-face card-back">
+						<p>
+							<span id="card-back-pos"></span>
+							<span id="card-back-definition"></span>
+						</p>
+						<img id="card-back-image" />
+						<audio id="card-back-audio" controls></audio>
+						<video id="card-back-video" controls autoplay loop muted></video>
+						<!-- Remove the above attributes as needed. -->
+					</div>
+					<!-- STUDENTS: End of recommended modifications -->
+				</button>
+			</div>
+			<!-- Navigation and learning progress buttons for the current flashcard -->
+			<div id="actions">
+				<button id="btn-back" class="btn btn-pagination">‹ Back</button>
+				<div id="btns-progress">
+					<button id="btn-again" class="btn btn-progress">☹ Again</button>
+					<button id="btn-good" class="btn btn-progress">😉 Good</button>
+					<button id="btn-easy" class="btn btn-progress">😍 Easy</button>
+				</div>
+				<button id="btn-skip" class="btn btn-pagination">Skip ›</button>
+			</div>
+		</main>
+		<!-- This line imports the JavaScript file containing the logic for the flashcard app. It can be modified to add functionality to the app. -->
+		<script src="./index.js" type="module"></script>
+	</body>
+</html>

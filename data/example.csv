@@ -1,0 +1,11 @@
+id,word,pos,definition,image,audio,video
+1,hello,n,A phrase used for greeting someone.,./res/hello.png,./res/hello.wav,
+2,world,n,"The earth, together with all of its countries and peoples.",,./res/world.wav,
+3,multimedia,adj,Using more than one medium of expression.,,./res/multimedia.wav,./res/multimedia.mp4
+4,computer,n,An electronic device for storing and processing data.,,,
+5,programming,n,The process of writing computer programs.,,,
+6,language,n,The method of human communication.,,,
+7,education,n,The process of receiving or giving systematic instruction.,,,
+8,instructor,n,A person who teaches something.,,,
+9,student,n,A person who is studying at a school or college.,,,
+10,university,n,An educational institution for higher learning.,,,

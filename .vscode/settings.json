@@ -1,0 +1,4 @@
+{
+	"github.copilot.chat.localeOverride": "en",
+	"github.copilot.chat.codeGeneration.useInstructionFiles": true
+}

@@ -1,0 +1,372 @@
+/* CSS reset - Don't modify */
+*, *::before, *::after {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+html {
+	text-size-adjust: none;
+	interpolate-size: allow-keywords;
+}
+
+body {
+	line-height: 1.5;
+	-webkit-font-smoothing: antialiased;
+}
+
+img, picture, video, canvas, svg {
+	display: block;
+	max-width: 100%;
+}
+
+input, button, textarea, select {
+	box-sizing: inherit;
+	color: inherit;
+	font: inherit;
+	line-height: inherit;
+}
+
+button {
+	appearance: none;
+	border: none;
+	background: none;
+	margin: 0;
+	padding: 0;
+	cursor: pointer;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	font-weight: 650;
+	text-wrap: balance;
+	overflow-wrap: break-word;
+}
+
+[hidden] {
+	display: none;
+}
+/* End of CSS reset */
+
+/*
+Transition styles - Convenient animation for element appearance and disappearance
+They can be combined such that multiple transitions are performed simultaneously.
+Note that these classes are only for transitions when showing and hiding elements with the `.hidden` element property.
+They are not for trivial transitions such as hovering effect.
+*/
+.transition-fade,
+.transition-zoom,
+.transition-slide-from-top,
+.transition-slide-from-bottom,
+.transition-slide-from-left,
+.transition-slide-from-right {
+	/* Any custom property name will work. It is just a placeholder */
+	--transition-fade: _;
+	--transition-zoom: _;
+	--transition-slide: _;
+	transition: display 0.3s allow-discrete, var(--transition-fade), var(--transition-zoom), var(--transition-slide);
+}
+
+.transition-fade {
+	--transition-fade: opacity 0.3s;
+	opacity: 1;
+	&[hidden] {
+		opacity: 0;
+	}
+	@starting-style {
+		opacity: 0;
+	}
+}
+
+.transition-zoom {
+	--transition-zoom: scale 0.3s;
+	scale: 1;
+	&[hidden] {
+		scale: 0;
+	}
+	@starting-style {
+		scale: 0;
+	}
+}
+
+.transition-slide-from-top {
+	--translate-y: -150vw;
+}
+
+.transition-slide-from-bottom {
+	--translate-y: 150vw;
+}
+
+.transition-slide-from-left {
+	--translate-x: -150vw;
+}
+
+.transition-slide-from-right {
+	--translate-x: 150vw;
+}
+
+.transition-slide-from-top,
+.transition-slide-from-bottom,
+.transition-slide-from-left,
+.transition-slide-from-right {
+	--transition-slide: translate 0.3s;
+	translate: none;
+	&[hidden] {
+		translate: var(--translate-x, 0) var(--translate-y, 0);
+	}
+	@starting-style {
+		translate: var(--translate-x, 0) var(--translate-y, 0);
+	}
+}
+/* End of Transition styles */
+
+/* Applies a custom font and centers the page using a grid layout. */
+html {
+	font-family: "Playpen Sans", fantasy;
+	font-size: clamp(12px, 0.5vw + 9.6px, 16px);
+	width: 100%;
+	height: 100%;
+	display: grid;
+	place-items: center;
+	background-color: #f4f8fb;
+	overflow: hidden;
+}
+
+body {
+	display: contents;
+}
+
+/* Arranges the main content into rows for heading, flashcard area and actions. */
+main {
+	padding: 1rem;
+	width: 100%;
+	height: 100%;
+	display: grid;
+	grid-template-rows: auto 1fr auto;
+	gap: 1rem;
+	max-width: 60rem;
+}
+
+/* Styles the heading with a title and a toggle button for the entries list. */
+#heading {
+	color: #002a44;
+	line-height: 1;
+}
+
+#toggle-entries {
+	display: inline-block;
+	width: 2.5rem;
+	font-size: 70%;
+	font-weight: 900;
+	text-align: center;
+	transform: rotate(88deg);
+	transform-origin: 60% 60%;
+	transition: color 0.3s;
+	color: #007acc;
+}
+
+#toggle-entries:hover {
+	color: #005488;
+}
+
+/* The entries list, which is overlaid on top of the flashcard area. */
+#entries {
+	position: relative;
+	grid-row: 2 / 3;
+	grid-column: 1 / 2;
+	height: 100%;
+	background-color: rgba(255, 255, 255, 0.9);
+	border: 1px solid rgba(0, 0, 0, 0.1);
+	z-index: 1;
+	border-radius: 1rem;
+}
+
+#entries-inner {
+	position: absolute;
+	inset: 0;
+	overflow-y: auto;
+}
+
+/* Table settings and row hover effects for the entries list. */
+#entries table {
+	width: 100%;
+	border-collapse: collapse;
+	text-align: center;
+}
+
+#entries th, #entries td {
+	padding: 0.75rem;
+	border-bottom: 1px solid #ddd;
+}
+
+#entries th {
+	background-color: #ddf5ff;
+}
+
+#entries th:first-child {
+	border-top-left-radius: 1rem;
+}
+
+#entries th:last-child {
+	border-top-right-radius: 1rem;
+}
+
+#entries thead {
+	position: sticky;
+	top: 0;
+}
+
+#entries tbody tr {
+	cursor: pointer;
+	transition: background-color 0.3s;
+}
+
+#entries tbody tr:hover {
+	background-color: #f1f1f1;
+}
+
+.row-highlight {
+	background-color: #fff3cd;
+}
+
+.overdue-date {
+	color: #d9534f;
+	font-weight: bold;
+}
+
+/* The flashcard container, which uses perspective to allow a 3D flip animation. */
+#card {
+	grid-row: 2 / 3;
+	grid-column: 1 / 2;
+	height: 100%;
+	position: relative;
+	perspective: 60rem;
+}
+
+#card-inner {
+	position: absolute;
+	inset: 0;
+	transform-style: preserve-3d;
+	transition: transform 0.6s;
+}
+
+/* Rotates the card around the Y-axis such that the back side is visible when `dataset.side` is set to "back" in JavaScript. */
+#card-inner[data-side="back"] {
+	transform: rotateY(180deg);
+}
+
+.card-face {
+	position: absolute;
+	inset: 0;
+	backface-visibility: hidden;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 2rem;
+	background-color: #fefefe;
+	border: 1px solid rgba(0, 0, 0, 0.1);
+	font-size: 150%;
+	border-radius: 1rem;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	transition: box-shadow 0.3s;
+}
+
+.card-face:hover {
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* STUDENTS: Start of recommended modifications */
+/* You can alter colours, fonts, sizing, or layout for .card-front and .card-back below. */
+
+/* Styles for the front side of the card. */
+.card-front {
+	color: #11222d;
+	/* Additional styles here (e.g., background-color: #bbccdd;) */
+}
+
+/* Add styles for additional elements on the front side here. Here is an example: */
+
+#card-front-word {
+	font-size: 200%;
+}
+
+/* Styles for the back side of the card. */
+.card-back {
+	transform: rotateY(180deg);
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	grid-template-rows: 1fr 1fr;
+	gap: 0.5rem;
+	/* Additional styles here (e.g., background-color: #bbddcc;) */
+}
+
+/* Add styles for additional elements on the back side here. Here are some examples: */
+
+#card-back-pos {
+	padding: 1px 3px;
+	color: #777;
+	border: 1px solid #777;
+	border-radius: 2px;
+	font-size: 90%;
+}
+
+#card-back-image {
+	grid-column: 2 / 3;
+	grid-row: 1 / 2;
+}
+
+#card-back-audio {
+	grid-column: 1 / 2;
+	grid-row: 2 / 3;
+}
+
+#card-back-video {
+	grid-column: 2 / 3;
+	grid-row: 2 / 3;
+}
+
+/* STUDENTS: End of recommended modifications */
+
+/* The actions area, which contains buttons for different actions. */
+#actions {
+	display: flex;
+	justify-content: space-between;
+	gap: 0.5rem;
+}
+
+.btn {
+	border: 1px solid rgba(0, 0, 0, 0.1);
+	padding: 0.5rem 2rem;
+	border-radius: 0.5rem;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.btn:hover {
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-pagination {
+	background-color: #ddf5ff;
+}
+
+.btn-pagination:hover {
+	background-color: #c1eaff;
+}
+
+#btns-progress {
+	display: flex;
+	gap: 0.5rem;
+}
+
+/* Styles the progress buttons with different background colours to make them stand out. */
+#btn-again {
+	background-color: #ffcccc;
+}
+
+#btn-good {
+	background-color: #ccffcc;
+}
+
+#btn-easy {
+	background-color: #ccccff;
+}
