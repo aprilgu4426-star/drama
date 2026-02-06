@@ -1,68 +1,55 @@
 /* CSS reset - Don't modify */
-*, *::before, *::after {
-	box-sizing: border-box;
-	margin: 0;
-	padding: 0;
-}
-
-html {
-	text-size-adjust: none;
-	interpolate-size: allow-keywords;
-}
-
-body {
-	line-height: 1.5;
-	-webkit-font-smoothing: antialiased;
-}
-
-img, picture, video, canvas, svg {
-	display: block;
-	max-width: 100%;
-}
-
-input, button, textarea, select {
-	box-sizing: inherit;
-	color: inherit;
-	font: inherit;
-	line-height: inherit;
-}
-
-button {
-	appearance: none;
-	border: none;
-	background: none;
-	margin: 0;
-	padding: 0;
-	cursor: pointer;
-}
-
-h1, h2, h3, h4, h5, h6 {
-	font-weight: 650;
-	text-wrap: balance;
-	overflow-wrap: break-word;
-}
-
-[hidden] {
-	display: none;
-}
-/* End of CSS reset */
-
-/*
-Transition styles - Convenient animation for element appearance and disappearance
-They can be combined such that multiple transitions are performed simultaneously.
-Note that these classes are only for transitions when showing and hiding elements with the `.hidden` element property.
-They are not for trivial transitions such as hovering effect.
-*/
 .transition-fade,
 .transition-zoom,
 .transition-slide-from-top,
 .transition-slide-from-bottom,
 .transition-slide-from-left,
 .transition-slide-from-right {
-	/* Any custom property name will work. It is just a placeholder */
-	--transition-fade: _;
-	--transition-zoom: _;
-	--transition-slide: _;
+	/* Use standard transitions for opacity and transform */
+	transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.transition-fade {
+	opacity: 1;
+}
+.transition-fade[hidden] {
+	opacity: 0;
+}
+
+.transition-zoom {
+	transform: scale(1);
+}
+.transition-zoom[hidden] {
+	transform: scale(0);
+}
+
+.transition-slide-from-top {
+	transform: translateY(0);
+}
+.transition-slide-from-top[hidden] {
+	transform: translateY(-150vw);
+}
+
+.transition-slide-from-bottom {
+	transform: translateY(0);
+}
+.transition-slide-from-bottom[hidden] {
+	transform: translateY(150vw);
+}
+
+.transition-slide-from-left {
+	transform: translateX(0);
+}
+.transition-slide-from-left[hidden] {
+	transform: translateX(-150vw);
+}
+
+.transition-slide-from-right {
+	transform: translateX(0);
+}
+.transition-slide-from-right[hidden] {
+	transform: translateX(150vw);
+}
 	transition: display 0.3s allow-discrete, var(--transition-fade), var(--transition-zoom), var(--transition-slide);
 }
 
@@ -150,6 +137,8 @@ main {
 #heading {
 	color: #002a44;
 	line-height: 1;
+	text-align: center;
+	position: relative;
 }
 
 #toggle-entries {
@@ -162,6 +151,10 @@ main {
 	transform-origin: 60% 60%;
 	transition: color 0.3s;
 	color: #007acc;
+	position: absolute;
+	left: 1rem;
+	top: 50%;
+	transform: translateY(-50%) rotate(88deg);
 }
 
 #toggle-entries:hover {
@@ -277,51 +270,80 @@ main {
 /* STUDENTS: Start of recommended modifications */
 /* You can alter colours, fonts, sizing, or layout for .card-front and .card-back below. */
 
-/* Styles for the front side of the card. */
+.card-face {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	padding: 1.5rem;
+	background-color: #ffffff;
+	height: 100%;
+	box-sizing: border-box;
+	overflow: hidden;
+}
+
+/* Ensure front/back have correct 3D orientation for the flip */
 .card-front {
-	color: #11222d;
-	/* Additional styles here (e.g., background-color: #bbccdd;) */
+	transform: rotateY(0deg);
 }
-
-/* Add styles for additional elements on the front side here. Here is an example: */
-
-#card-front-word {
-	font-size: 200%;
-}
-
-/* Styles for the back side of the card. */
 .card-back {
 	transform: rotateY(180deg);
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	grid-template-rows: 1fr 1fr;
-	gap: 0.5rem;
-	/* Additional styles here (e.g., background-color: #bbddcc;) */
 }
 
-/* Add styles for additional elements on the back side here. Here are some examples: */
+/* Stack ordering depending on visible side */
+#card-inner[data-side="front"] .card-front { z-index: 2; }
+#card-inner[data-side="front"] .card-back { z-index: 1; }
+#card-inner[data-side="back"] .card-back { z-index: 2; }
+#card-inner[data-side="back"] .card-front { z-index: 1; }
 
-#card-back-pos {
-	padding: 1px 3px;
-	color: #777;
-	border: 1px solid #777;
+/* Make collocation prominent per request */
+.collocation-title {
+	color: #007acc;
+	font-weight: 900;
+	font-size: 2.4rem;
+	margin-bottom: 0.25rem;
+}
+
+.flashcard-media {
+	width: 100%;
+	max-height: 180px;
+	object-fit: contain;
+	margin-bottom: 1rem;
+}
+
+.highlight-word {
+	color: #007acc;
+	font-weight: 800;
+	font-size: 2.2rem;
+	margin-bottom: 0.5rem;
+}
+
+.marker {
+	background-color: #ffff00;
+	font-weight: bold;
+	padding: 0 4px;
 	border-radius: 2px;
-	font-size: 90%;
 }
 
-#card-back-image {
-	grid-column: 2 / 3;
-	grid-row: 1 / 2;
+.complete-sentence {
+	margin: 1rem 0 0 0;
+	padding: 12px;
+	background-color: #fdf6e3;
+	border-radius: 8px;
+	width: 100%;
+	font-size: 1.1rem;
 }
 
-#card-back-audio {
-	grid-column: 1 / 2;
-	grid-row: 2 / 3;
+.meaning-text {
+	font-size: 1.6rem;
+	font-weight: 700;
+	margin: 0.5rem 0 0.75rem 0;
 }
 
-#card-back-video {
-	grid-column: 2 / 3;
-	grid-row: 2 / 3;
+.audio-controls {
+	margin-top: 0.25rem;
+	margin-bottom: 0.5rem;
 }
 
 /* STUDENTS: End of recommended modifications */
@@ -370,3 +392,32 @@ main {
 #btn-easy {
 	background-color: #ccccff;
 }
+
+/* Circular side buttons beside the card */
+.btn-circle {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 6rem;
+	height: 6rem;
+	border-radius: 50%;
+	border: none;
+	background: #cfefff; /* light blue fill */
+	color: #ffffff;
+	font-weight: 700;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 0.1rem;
+	box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+	cursor: pointer;
+}
+.btn-left { left: -3rem; }
+.btn-right { right: -3rem; }
+
+/* Slightly larger on hover */
+.btn-circle:hover { transform: translateY(-50%) scale(1.05); }
+
+.btn-circle .icon { font-size: 1.6rem; line-height: 1; }
+.btn-circle .label { font-size: 0.85rem; line-height: 1; color: #ffffff; }

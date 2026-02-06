@@ -1,6 +1,6 @@
 import { csvParse, autoType } from "https://cdn.jsdelivr.net/npm/d3-dsv/+esm";
 
-const response = await fetch("./data/example.csv");
+const response = await fetch("./data/dataset.csv");
 const dataset = csvParse(await response.text(), autoType);
 
 /** Loads flashcard progress from local storage if available. */
@@ -14,15 +14,25 @@ function saveProgress(progress) {
 	localStorage.setItem("flashcardProgress", JSON.stringify(progress));
 }
 
-// Sorts the flashcards by their due date to prioritise learning.
 const progressData = loadProgress();
-const cards = dataset
-	.sort((a, b) => {
-		// Put cards without a dueDate at the last
-		const dateA = progressData[a.id]?.dueDate ? new Date(progressData[a.id].dueDate) : Infinity;
-		const dateB = progressData[b.id]?.dueDate ? new Date(progressData[b.id].dueDate) : Infinity;
-		return dateA - dateB;
-	});
+
+// Normalize CSV rows into a consistent shape that the rest of the app expects.
+let cards = dataset.map((row, idx) => ({
+	id: (row.id ?? row.ID ?? row.Word ?? row.word ?? String(idx + 1)).toString(),
+	word: row.Word ?? row.word ?? "",
+	image: row.Image ?? row.image ?? "",
+	sentence: row.Sentence ?? row.sentence ?? "",
+	collocation: row.Collocation ?? row.collocation ?? "",
+	meaning: row.Meaning ?? row.meaning ?? "",
+	completeSentence: row["Complete Sentence"] ?? row["Complete sentence"] ?? row.completeSentence ?? "",
+	audio: row.Audio ?? row.audio ?? ""
+}));
+
+cards.sort((a, b) => {
+	const dateA = progressData[a.id]?.dueDate ? new Date(progressData[a.id].dueDate) : Infinity;
+	const dateB = progressData[b.id]?.dueDate ? new Date(progressData[b.id].dueDate) : Infinity;
+	return dateA - dateB;
+});
 
 let currentIndex = 0;
 
@@ -35,16 +45,16 @@ function initEntries() {
 			currentIndex = index;
 			renderCard();
 		});
-		const cellId = document.createElement("td");
-		cellId.textContent = card.id;
 		const cellWord = document.createElement("td");
 		cellWord.textContent = card.word;
-		const cellDue = document.createElement("td");
-		cellDue.textContent = progressData[card.id]?.dueDate ?? "Unseen"; // If the card has not been learnt before, mark it as "Unseen"
+		const cellColl = document.createElement("td");
+		cellColl.textContent = card.collocation;
+		const cellMean = document.createElement("td");
+		cellMean.textContent = card.meaning;
 
-		row.appendChild(cellId);
 		row.appendChild(cellWord);
-		row.appendChild(cellDue);
+		row.appendChild(cellColl);
+		row.appendChild(cellMean);
 		document.getElementById("entries-body").appendChild(row);
 	}
 }
@@ -56,17 +66,11 @@ function updateEntries() {
 		const row = document.getElementById("entries-body").children[index];
 		row.classList.toggle("row-highlight", index === currentIndex);
 
-		const cellDue = row.children[row.childElementCount - 1];
-		const dueDateString = progressData[card.id]?.dueDate;
-		if (dueDateString) {
-			cellDue.textContent = dueDateString;
-			// If the due date is earlier than today, mark it as overdue
-			const dueDate = new Date(dueDateString);
-			const today = new Date();
-			cellDue.classList.toggle("overdue-date", dueDate.setHours(0, 0, 0, 0) < today.setHours(0, 0, 0, 0));
-		} else {
-			cellDue.textContent = "Unseen";
-			cellDue.classList.remove("overdue-date");
+		// refresh collocation and meaning in case data changed or sorting updated
+		if (row) {
+			row.children[0].textContent = card.word;
+			row.children[1].textContent = card.collocation;
+			row.children[2].textContent = card.meaning;
 		}
 	}
 }
@@ -83,30 +87,71 @@ const posMapping = {
 	// Add more mappings as needed
 };
 
-const transitionHalfDuration = parseFloat(getComputedStyle(document.getElementById("card-inner")).transitionDuration) * 1000 / 2;
+// Compute transition half duration safely; fallback to 150ms if not available.
+let transitionHalfDuration = 150;
+try {
+	const el = document.getElementById("card-inner");
+	if (el) {
+		const val = getComputedStyle(el).transitionDuration;
+		const px = parseFloat(val) || 0;
+		transitionHalfDuration = (px * 1000) / 2;
+	}
+} catch (e) {
+	// ignore and use fallback
+}
 
 /** Renders the current card on both front and back. */
 function renderCard() {
-	// STUDENTS: Start of recommended modifications
-	// If there are more columns in the dataset (e.g., synonyms, example sentences),
-	// display them here (e.g., document.getElementById("card-synonym").textContent = currentCard.synonym).
-
-	// Reset flashcard to the front side
-	document.getElementById("card-inner").dataset.side = "front";
-
-	// Update the front side with the current card's word
+	const elInner = document.getElementById("card-inner");
+	if (elInner) elInner.dataset.side = "front";
 	const currentCard = cards[currentIndex];
-	document.getElementById("card-front-word").textContent = currentCard.word;
 
-	// Wait for the back side to become invisible before updating the content on the back side
+	// Front
+	const imgEl = document.getElementById("card-front-image");
+	if (imgEl) imgEl.src = encodeURI(`./res/image/${currentCard.image}`);
+	const wordEl = document.getElementById("card-front-word");
+	if (wordEl) wordEl.textContent = currentCard.word;
+	const sentEl = document.getElementById("card-front-sentence");
+	if (sentEl) sentEl.textContent = currentCard.sentence;
+
+	// Back (after half transition to avoid flicker)
 	setTimeout(() => {
-		document.getElementById("card-back-pos").textContent = posMapping[currentCard.pos] ?? currentCard.pos;
-		document.getElementById("card-back-definition").textContent = currentCard.definition;
-		document.getElementById("card-back-image").src = currentCard.image;
-		document.getElementById("card-back-audio").src = currentCard.audio;
-		document.getElementById("card-back-video").src = currentCard.video;
+		const collEl = document.getElementById("card-back-collocation");
+		if (collEl) collEl.textContent = currentCard.collocation;
+		const meanEl = document.getElementById("card-back-meaning");
+		if (meanEl) meanEl.textContent = currentCard.meaning;
+
+		const audio = document.getElementById("card-back-audio");
+		if (audio) {
+			audio.src = encodeURI(`./res/audio/${currentCard.audio}`);
+			// expose load error for debugging
+			audio.onerror = () => console.warn("Audio failed to load:", audio.src);
+		}
+
+		const playBtn = document.getElementById("play-audio-btn");
+		if (playBtn && audio) {
+			playBtn.onclick = (e) => { e.stopPropagation(); audio.play(); };
+		}
+
+		const fullText = currentCard.completeSentence ?? "";
+		const target = (currentCard.collocation ?? "").trim();
+		function escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+		let highlightedText = fullText;
+		if (target) {
+			// build a flexible regex that allows simple verb inflections on the first word (s/ed/ing)
+			const parts = target.split(/\s+/).filter(Boolean);
+			if (parts.length) {
+				const first = escapeRegex(parts[0]);
+				const firstVar = `${first}(?:s|ed|ing)?`;
+				const rest = parts.slice(1).map(escapeRegex).join("\\s+");
+				const pattern = rest ? `${firstVar}\\s+${rest}` : firstVar;
+				const rx = new RegExp(pattern, 'gi');
+				highlightedText = fullText.replace(rx, (match) => `<span class="marker">${match}</span>`);
+			}
+		}
+		const completeEl = document.getElementById("card-back-complete");
+		if (completeEl) completeEl.innerHTML = highlightedText;
 	}, transitionHalfDuration);
-	// STUDENTS: End of recommended modifications
 
 	updateEntries();
 }
@@ -118,10 +163,10 @@ document.getElementById("toggle-entries").addEventListener("click", () => {
 
 // Flip the card when the card itself is clicked
 document.getElementById("card-inner").addEventListener("click", event => {
-	// Only flip the card when clicking on the underlying card faces, not any elements inside.
-	// This line is unnecessary for other buttons.
-	if (!event.target?.classList?.contains("card-face")) return;
+	// Prevent flipping when interacting with audio controls
+	if (event.target.closest && event.target.closest(".audio-controls")) return;
 
+	// Toggle side regardless of which inner element was clicked (handles clicks on children)
 	event.currentTarget.dataset.side = event.currentTarget.dataset.side === "front" ? "back" : "front";
 });
 
@@ -135,11 +180,19 @@ function nextCard() {
 	currentIndex = (currentIndex + 1) % cards.length;
 }
 
-document.getElementById("btn-back").addEventListener("click", () => {
-	previousCard();
-	renderCard();
+// New simplified controls: left = review (flip), right = mastered (mark and advance)
+const reviewBtn = document.getElementById("btn-review");
+if (reviewBtn) reviewBtn.addEventListener("click", (e) => {
+	e.stopPropagation();
+	const el = document.getElementById("card-inner");
+	if (el) el.dataset.side = el.dataset.side === "front" ? "back" : "front";
 });
-document.getElementById("btn-skip").addEventListener("click", () => {
+
+const masteredBtn = document.getElementById("btn-mastered");
+if (masteredBtn) masteredBtn.addEventListener("click", (e) => {
+	e.stopPropagation();
+	// keep previous behavior: schedule as 'easy' then go to next
+	updateDueDate("easy");
 	nextCard();
 	renderCard();
 });
@@ -161,21 +214,7 @@ function updateDueDate(type) {
 	updateEntries();
 }
 
-document.getElementById("btn-again").addEventListener("click", () => {
-	updateDueDate("again");
-	nextCard();
-	renderCard();
-});
-document.getElementById("btn-good").addEventListener("click", () => {
-	updateDueDate("good");
-	nextCard();
-	renderCard();
-});
-document.getElementById("btn-easy").addEventListener("click", () => {
-	updateDueDate("easy");
-	nextCard();
-	renderCard();
-});
+// old per-button handlers removed; replaced by circular buttons
 
 // Initial render
 initEntries();

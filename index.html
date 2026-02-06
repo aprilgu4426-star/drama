@@ -16,7 +16,7 @@
 			<!-- The heading includes a button to show/hide all flashcard entries. -->
 			<h1 id="heading">
 				<button id="toggle-entries" title="Show All Entries">|||</button>
-				Vanilla Flashcard App Template
+				<span class="heading-title">Verb+Preposition Collocation Practice</span>
 			</h1>
 			<!-- A list of all cards for quick access -->
 			<div id="entries" class="transition-fade transition-slide-from-left transition-slide-from-top" hidden>
@@ -24,9 +24,9 @@
 					<table>
 						<thead>
 							<tr>
-								<th>ID</th>
 								<th>Word</th>
-								<th>Due Date</th>
+								<th>Collocation</th>
+								<th>Meaning</th>
 							</tr>
 						</thead>
 						<tbody id="entries-body"></tbody>
@@ -35,35 +35,26 @@
 			</div>
 			<!-- The flashcard area. Clicking flips between front and back by setting `dataset.side`. -->
 			<div id="card">
-				<button id="card-inner" data-side="front">
-					<!-- STUDENTS: Start of recommended modifications -->
-					<!-- Add and rearrange HTML elements inside .card-front and .card-back below. -->
+				<div id="card-inner" data-side="front" role="button" tabindex="0">
 					<div class="card-face card-front">
-						<h2 id="card-front-word"></h2>
+						<img id="card-front-image" class="flashcard-media" alt="" />
+						<h2 id="card-front-word" class="highlight-word"></h2>
+						<p id="card-front-sentence" class="sentence-text"></p>
 					</div>
+
 					<div class="card-face card-back">
-						<p>
-							<span id="card-back-pos"></span>
-							<span id="card-back-definition"></span>
-						</p>
-						<img id="card-back-image" />
-						<audio id="card-back-audio" controls></audio>
-						<video id="card-back-video" controls autoplay loop muted></video>
-						<!-- Remove the above attributes as needed. -->
+						<h2 id="card-back-collocation" class="collocation-title"></h2>
+						<div class="audio-controls">
+							<audio id="card-back-audio" controls></audio>
+						</div>
+						<h3 id="card-back-meaning" class="meaning-text"></h3>
+						<p id="card-back-complete" class="complete-sentence"></p>
 					</div>
-					<!-- STUDENTS: End of recommended modifications -->
-				</button>
-			</div>
-			<!-- Navigation and learning progress buttons for the current flashcard -->
-			<div id="actions">
-				<button id="btn-back" class="btn btn-pagination">‹ Back</button>
-				<div id="btns-progress">
-					<button id="btn-again" class="btn btn-progress">☹ Again</button>
-					<button id="btn-good" class="btn btn-progress">😉 Good</button>
-					<button id="btn-easy" class="btn btn-progress">😍 Easy</button>
 				</div>
-				<button id="btn-skip" class="btn btn-pagination">Skip ›</button>
+				<button id="btn-review" class="btn-circle btn-left" title="Review Again"><span class="icon">↺</span><span class="label">Revise Again</span></button>
+				<button id="btn-mastered" class="btn-circle btn-right" title="Mastered"><span class="icon">✓</span><span class="label">Mastered</span></button>
 			</div>
+			<!-- Actions removed; replaced by circular buttons beside the card -->
 		</main>
 		<!-- This line imports the JavaScript file containing the logic for the flashcard app. It can be modified to add functionality to the app. -->
 		<script src="./index.js" type="module"></script>
