@@ -64,7 +64,9 @@ function updateEntries() {
 	// Update row highlight and due dates
 	for (const [index, card] of cards.entries()) {
 		const row = document.getElementById("entries-body").children[index];
-		row.classList.toggle("row-highlight", index === currentIndex);
+		// Do not apply the row highlight for the "agree" entry — keep highlighting only on the card back.
+		const isCurrent = index === currentIndex && String(card.word).toLowerCase() !== "agree";
+		row.classList.toggle("row-highlight", isCurrent);
 
 		// refresh collocation and meaning in case data changed or sorting updated
 		if (row) {
@@ -138,15 +140,51 @@ function renderCard() {
 		function escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
 		let highlightedText = fullText;
 		if (target) {
+			// Special-case: ensure "agreed on" in completed sentence is highlighted
+			if (target.toLowerCase() === "agree on") {
+				highlightedText = fullText.replace(/\b(agreed)\s+(on)\b/gi, '<span class="marker">$1</span> <span class="marker">$2</span>');
+			}
 			// build a flexible regex that allows simple verb inflections on the first word (s/ed/ing)
 			const parts = target.split(/\s+/).filter(Boolean);
 			if (parts.length) {
-				const first = escapeRegex(parts[0]);
-				const firstVar = `${first}(?:s|ed|ing)?`;
+				const firstRaw = parts[0].toLowerCase();
+				const firstEsc = escapeRegex(parts[0]);
+				const irregularVariants = {
+					"run": "(?:run|ran|runs|running)",
+					"be": "(?:be|am|is|are|was|were|been|being)",
+					"have": "(?:have|has|had|having)",
+					"do": "(?:do|does|did|doing)"
+				};
+				let firstVar;
+				if (irregularVariants[firstRaw]) {
+					firstVar = irregularVariants[firstRaw];
+				} else {
+					firstVar = `${firstEsc}(?:s|ed|ing)?`;
+				}
 				const rest = parts.slice(1).map(escapeRegex).join("\\s+");
-				const pattern = rest ? `${firstVar}\\s+${rest}` : firstVar;
-				const rx = new RegExp(pattern, 'gi');
-				highlightedText = fullText.replace(rx, (match) => `<span class="marker">${match}</span>`);
+				// Allow a small number of optional intervening words between verb and preposition
+				// to handle cases like "congratulate you on" or "provide students with".
+				let pattern;
+				if (rest) {
+					pattern = `${firstVar}(?:\\s+\\S+){0,2}?\\s+${rest}`;
+				} else {
+					pattern = firstVar;
+				}
+				if (rest) {
+					// Capture verb, optional intervening words, and preposition separately
+					const patternWithGroups = `\\b(${firstVar})\\b(?:\\s+((?:\\S+\\s+){0,2}?\\S+))?\\s+\\b(${rest})\\b`;
+					const rxWithGroups = new RegExp(patternWithGroups, 'gi');
+					highlightedText = fullText.replace(rxWithGroups, (match, g1, mid, g3) => {
+						const verbSpan = `<span class="marker">${g1}</span>`;
+						const prepSpan = `<span class="marker">${g3}</span>`;
+						if (mid) return `${verbSpan} ${mid} ${prepSpan}`;
+						return `${verbSpan} ${prepSpan}`;
+					});
+				} else {
+					// Single-word collocation (highlight the verb form only)
+					const rxSingle = new RegExp(`\\b${firstVar}\\b`, 'gi');
+					highlightedText = fullText.replace(rxSingle, (m) => `<span class="marker">${m}</span>`);
+				}
 			}
 		}
 		const completeEl = document.getElementById("card-back-complete");
@@ -184,8 +222,11 @@ function nextCard() {
 const reviewBtn = document.getElementById("btn-review");
 if (reviewBtn) reviewBtn.addEventListener("click", (e) => {
 	e.stopPropagation();
-	const el = document.getElementById("card-inner");
-	if (el) el.dataset.side = el.dataset.side === "front" ? "back" : "front";
+ 	// Go to the previous card and show its front side for review
+ 	previousCard();
+ 	const el = document.getElementById("card-inner");
+ 	if (el) el.dataset.side = "front";
+ 	renderCard();
 });
 
 const masteredBtn = document.getElementById("btn-mastered");

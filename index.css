@@ -50,60 +50,7 @@
 .transition-slide-from-right[hidden] {
 	transform: translateX(150vw);
 }
-	transition: display 0.3s allow-discrete, var(--transition-fade), var(--transition-zoom), var(--transition-slide);
-}
-
-.transition-fade {
-	--transition-fade: opacity 0.3s;
-	opacity: 1;
-	&[hidden] {
-		opacity: 0;
-	}
-	@starting-style {
-		opacity: 0;
-	}
-}
-
-.transition-zoom {
-	--transition-zoom: scale 0.3s;
-	scale: 1;
-	&[hidden] {
-		scale: 0;
-	}
-	@starting-style {
-		scale: 0;
-	}
-}
-
-.transition-slide-from-top {
-	--translate-y: -150vw;
-}
-
-.transition-slide-from-bottom {
-	--translate-y: 150vw;
-}
-
-.transition-slide-from-left {
-	--translate-x: -150vw;
-}
-
-.transition-slide-from-right {
-	--translate-x: 150vw;
-}
-
-.transition-slide-from-top,
-.transition-slide-from-bottom,
-.transition-slide-from-left,
-.transition-slide-from-right {
-	--transition-slide: translate 0.3s;
-	translate: none;
-	&[hidden] {
-		translate: var(--translate-x, 0) var(--translate-y, 0);
-	}
-	@starting-style {
-		translate: var(--translate-x, 0) var(--translate-y, 0);
-	}
-}
+/* End of Transition styles */
 /* End of Transition styles */
 
 /* Applies a custom font and centers the page using a grid layout. */
@@ -321,9 +268,12 @@ main {
 
 .marker {
 	background-color: #ffff00;
+	background: linear-gradient(120deg, #ffff00 0%, #ffeb3b 50%, #ffff00 100%);
+	color: #000;
 	font-weight: bold;
-	padding: 0 4px;
-	border-radius: 2px;
+	padding: 0.125rem 0.25rem;
+	border-radius: 0.25rem;
+	box-shadow: 0 0 0.5rem rgba(255, 235, 59, 0.6);
 }
 
 .complete-sentence {
